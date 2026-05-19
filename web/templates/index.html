@@ -6,125 +6,98 @@
     <title>SmartBin Dashboard</title>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      body {
+      @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap");
+
+      * {
         margin: 0;
         padding: 0;
-        font-family: Arial, sans-serif;
-        background: #f4f6f9;
+        box-sizing: border-box;
       }
-      .container {
-        width: 90%;
-        max-width: 1000px;
-        margin: auto;
-        padding: 20px;
+
+      :root {
+        --bg: #0d1117;
+        --bg2: #161b22;
+        --bg3: #1c2333;
+        --border: rgba(255, 255, 255, 0.08);
+        --green: #27ae60;
+        --green2: #2ecc71;
+        --blue: #2980b9;
+        --red: #c0392b;
+        --text: #e6edf3;
+        --muted: #8b949e;
+        --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
       }
-      .header {
-        background: #2c3e50;
-        color: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        margin-bottom: 20px;
+
+      body {
+        font-family: "Inter", sans-serif;
+        background: var(--bg);
+        color: var(--text);
+        min-height: 100vh;
       }
-      .header a {
-        color: #2ecc71;
-        font-size: 14px;
+
+      /* ===== NAVBAR ===== */
+      nav {
+        background: rgba(13, 17, 23, 0.95);
+        backdrop-filter: blur(12px);
+        border-bottom: 1px solid var(--border);
+        padding: 14px 24px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        position: sticky;
+        top: 0;
+        z-index: 100;
+      }
+      .nav-brand {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Space Mono", monospace;
+        font-size: 16px;
+        font-weight: 700;
+        color: var(--green2);
         text-decoration: none;
-        display: block;
-        margin-top: 5px;
       }
-      .video-box {
-        background: black;
-        border-radius: 10px;
-        overflow: hidden;
-        margin-bottom: 20px;
-        text-align: center;
+      .nav-brand span {
+        color: var(--text);
       }
-      .video-box img {
-        width: 100%;
-        max-width: 640px;
-        height: auto;
+      .nav-back {
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        border: 1px solid var(--border);
+        padding: 6px 14px;
+        border-radius: 20px;
+        transition: all 0.2s;
       }
-      .status-box {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      .nav-back:hover {
+        color: var(--green2);
+        border-color: var(--green);
       }
-      .status-title {
-        font-size: 24px;
-        margin-bottom: 10px;
-        color: #34495e;
+      #lastUpdate {
+        font-size: 12px;
+        color: var(--muted);
       }
-      .last-detect {
-        font-size: 30px;
-        font-weight: bold;
-        color: #27ae60;
+
+      /* ===== LAYOUT ===== */
+      .container {
+        max-width: 1100px;
+        margin: 0 auto;
+        padding: 28px 20px;
       }
-      .grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 20px;
-        margin-bottom: 20px;
-      }
-      .card {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        text-align: center;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-        position: relative;
-      }
-      .card h2 {
-        margin: 0 0 10px;
-        color: #34495e;
-      }
-      .count {
-        font-size: 40px;
-        font-weight: bold;
-      }
-      .progress-bar-bg {
-        background: #ecf0f1;
-        border-radius: 10px;
-        height: 12px;
-        margin-top: 10px;
-        overflow: hidden;
-      }
-      .progress-bar {
-        height: 12px;
-        border-radius: 10px;
-        transition: width 0.3s;
-      }
-      .organik {
-        color: #27ae60;
-      }
-      .anorganik {
-        color: #2980b9;
-      }
-      .b3 {
-        color: #c0392b;
-      }
-      .bar-organik {
-        background: #27ae60;
-      }
-      .bar-anorganik {
-        background: #2980b9;
-      }
-      .bar-b3 {
-        background: #c0392b;
-      }
+
+      /* ===== ALERT ===== */
       .alert-penuh {
-        background: #e74c3c;
-        color: white;
-        padding: 15px 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        font-size: 18px;
-        font-weight: bold;
+        background: linear-gradient(135deg, #7b1919, #c0392b);
+        border: 1px solid rgba(231, 76, 60, 0.4);
+        padding: 14px 20px;
+        border-radius: 12px;
+        margin-bottom: 24px;
+        font-size: 15px;
+        font-weight: 600;
         text-align: center;
-        animation: blink 1s infinite;
         display: none;
+        animation: blink 1.4s infinite;
       }
       .alert-penuh.show {
         display: block;
@@ -135,133 +108,369 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.6;
+          opacity: 0.7;
         }
+      }
+
+      /* ===== STREAM ===== */
+      #stream-container {
+        margin-bottom: 24px;
+        border-radius: 14px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #000;
+      }
+      #stream-container img {
+        width: 100%;
+        display: block;
+      }
+
+      /* ===== LAST DETECT ===== */
+      .detect-card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 20px 24px;
+        margin-bottom: 24px;
+        display: flex;
+        align-items: center;
+        gap: 16px;
+      }
+      .detect-label {
+        font-size: 13px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+      }
+      #lastDetect {
+        font-size: 28px;
+        font-weight: 700;
+        color: var(--green2);
+        font-family: "Space Mono", monospace;
+      }
+      .detect-dot {
+        width: 10px;
+        height: 10px;
+        border-radius: 50%;
+        background: var(--green2);
+        box-shadow: 0 0 8px var(--green);
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+      }
+      @keyframes pulse {
+        0%,
+        100% {
+          opacity: 1;
+        }
+        50% {
+          opacity: 0.4;
+        }
+      }
+
+      /* ===== GRID CARDS ===== */
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        gap: 16px;
+        margin-bottom: 24px;
+      }
+      .card {
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px 20px;
+        position: relative;
+        transition:
+          border-color 0.2s,
+          transform 0.2s;
+      }
+      .card:hover {
+        transform: translateY(-2px);
+        border-color: rgba(255, 255, 255, 0.15);
+      }
+      .card-icon {
+        font-size: 28px;
+        margin-bottom: 8px;
+      }
+      .card-label {
+        font-size: 12px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+        margin-bottom: 4px;
+      }
+      .count {
+        font-size: 44px;
+        font-weight: 700;
+        font-family: "Space Mono", monospace;
+        line-height: 1;
+      }
+      .count-sub {
+        font-size: 13px;
+        color: var(--muted);
+        margin-top: 4px;
+      }
+      .progress-bar-bg {
+        background: rgba(255, 255, 255, 0.07);
+        border-radius: 8px;
+        height: 6px;
+        margin-top: 14px;
+        overflow: hidden;
+      }
+      .progress-bar {
+        height: 6px;
+        border-radius: 8px;
+        transition: width 0.5s ease;
+      }
+      .organik {
+        color: var(--green2);
+      }
+      .bar-organik {
+        background: linear-gradient(90deg, var(--green), var(--green2));
+      }
+      .anorganik {
+        color: #5dade2;
+      }
+      .bar-anorganik {
+        background: linear-gradient(90deg, var(--blue), #5dade2);
+      }
+      .b3 {
+        color: #e74c3c;
+      }
+      .bar-b3 {
+        background: linear-gradient(90deg, var(--red), #e74c3c);
       }
       .badge-penuh {
         position: absolute;
-        top: 10px;
-        right: 10px;
-        background: #e74c3c;
+        top: 12px;
+        right: 12px;
+        background: var(--red);
         color: white;
-        padding: 3px 8px;
-        border-radius: 5px;
-        font-size: 12px;
-        font-weight: bold;
+        padding: 2px 8px;
+        border-radius: 6px;
+        font-size: 11px;
+        font-weight: 700;
         display: none;
+        letter-spacing: 0.05em;
       }
       .badge-penuh.show {
         display: block;
       }
-      .btn-reset {
-        background: #e74c3c;
-        color: white;
-        border: none;
-        padding: 12px 30px;
-        border-radius: 8px;
-        font-size: 16px;
-        cursor: pointer;
+
+      /* ===== SECTION TITLE ===== */
+      .section-title {
+        font-size: 13px;
+        color: var(--muted);
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        margin-bottom: 14px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
       }
-      .btn-reset:hover {
-        background: #c0392b;
+      .section-title::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: var(--border);
       }
 
-      /* GRAFIK */
+      /* ===== CHART ===== */
       .chart-box {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-      }
-      .chart-box h3 {
-        color: #34495e;
-        margin-bottom: 15px;
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        padding: 22px;
+        margin-bottom: 24px;
       }
 
-      /* HISTORI */
+      /* ===== HISTORI (collapsible) ===== */
       .histori-box {
-        background: white;
-        padding: 20px;
-        border-radius: 10px;
-        margin-bottom: 20px;
-        box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+        background: var(--bg2);
+        border: 1px solid var(--border);
+        border-radius: 14px;
+        margin-bottom: 24px;
+        overflow: hidden;
       }
-      .histori-box h3 {
-        color: #34495e;
-        margin-bottom: 15px;
+      .histori-header {
+        padding: 18px 22px;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        cursor: pointer;
+        user-select: none;
+        transition: background 0.2s;
       }
+      .histori-header:hover {
+        background: rgba(255, 255, 255, 0.03);
+      }
+      .histori-header-left {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+      .histori-count {
+        background: rgba(39, 174, 96, 0.15);
+        color: var(--green2);
+        font-size: 11px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 20px;
+        border: 1px solid rgba(39, 174, 96, 0.25);
+      }
+      .histori-toggle {
+        font-size: 13px;
+        color: var(--muted);
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+      .chevron {
+        transition: transform 0.3s;
+        font-size: 11px;
+      }
+      .chevron.open {
+        transform: rotate(180deg);
+      }
+
+      .histori-body {
+        max-height: 0;
+        overflow: hidden;
+        transition: max-height 0.35s ease;
+      }
+      .histori-body.open {
+        max-height: 600px;
+      }
+
+      .histori-inner {
+        padding: 0 22px 20px;
+      }
+
       table {
         width: 100%;
         border-collapse: collapse;
-        font-size: 14px;
+        font-size: 13px;
       }
       th {
-        background: #2c3e50;
-        color: white;
-        padding: 10px;
+        background: var(--bg3);
+        color: var(--muted);
+        padding: 10px 12px;
         text-align: left;
+        font-size: 11px;
+        text-transform: uppercase;
+        letter-spacing: 0.07em;
+        font-weight: 500;
+      }
+      th:first-child {
+        border-radius: 8px 0 0 8px;
+      }
+      th:last-child {
+        border-radius: 0 8px 8px 0;
       }
       td {
-        padding: 8px 10px;
-        border-bottom: 1px solid #ecf0f1;
+        padding: 10px 12px;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        color: var(--text);
+      }
+      tr:last-child td {
+        border-bottom: none;
       }
       tr:hover td {
-        background: #f8f9fa;
+        background: rgba(255, 255, 255, 0.02);
       }
       .badge {
         padding: 3px 10px;
         border-radius: 20px;
-        font-size: 12px;
-        font-weight: bold;
-        color: white;
+        font-size: 11px;
+        font-weight: 700;
+        letter-spacing: 0.03em;
       }
       .badge-organik {
-        background: #27ae60;
+        background: rgba(39, 174, 96, 0.15);
+        color: #2ecc71;
+        border: 1px solid rgba(39, 174, 96, 0.3);
       }
       .badge-anorganik {
-        background: #2980b9;
+        background: rgba(41, 128, 185, 0.15);
+        color: #5dade2;
+        border: 1px solid rgba(41, 128, 185, 0.3);
       }
       .badge-b3 {
-        background: #c0392b;
+        background: rgba(192, 57, 43, 0.15);
+        color: #e74c3c;
+        border: 1px solid rgba(192, 57, 43, 0.3);
       }
 
-      .footer {
-        margin-top: 30px;
+      /* ===== RESET ===== */
+      .btn-reset {
+        background: transparent;
+        color: var(--red);
+        border: 1px solid rgba(192, 57, 43, 0.4);
+        padding: 12px 28px;
+        border-radius: 10px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        transition: all 0.2s;
+        font-family: "Inter", sans-serif;
+      }
+      .btn-reset:hover {
+        background: rgba(192, 57, 43, 0.1);
+        border-color: var(--red);
+      }
+
+      /* ===== FOOTER ===== */
+      footer {
+        margin-top: 40px;
+        padding: 20px 0;
         text-align: center;
-        color: gray;
+        color: var(--muted);
+        font-size: 12px;
+        border-top: 1px solid var(--border);
+        font-family: "Space Mono", monospace;
       }
     </style>
   </head>
   <body>
+    <!-- NAVBAR -->
+    <nav>
+      <a class="nav-brand" href="/dashboard">🗑️ <span>SmartBin</span> AI</a>
+      <span id="lastUpdate">—</span>
+      <a class="nav-back" href="/">← Beranda</a>
+    </nav>
+
     <div class="container">
-      <div class="header">
-        <h1>🗑️ SMARTBIN AI DASHBOARD</h1>
-        <p>Sistem Deteksi Sampah Otomatis Berbasis AI</p>
-        <a href="/">← Kembali ke Beranda</a>
-      </div>
-      <div id="stream-container"></div>
+      <!-- ALERT PENUH -->
       <div class="alert-penuh" id="alertPenuh">
         🚨 PERINGATAN: Tempat sampah sudah penuh! Segera dikosongkan!
         <span id="alertDetail"></span>
       </div>
-      <!-- 
-      <div class="video-box">
-        <img src="/video_feed" alt="Live Camera" />
-      </div>
-      -->
 
-      <div class="status-box">
-        <div class="status-title">Deteksi Terakhir</div>
-        <div class="last-detect" id="lastDetect">Belum ada deteksi</div>
+      <!-- STREAM -->
+      <div id="stream-container"></div>
+
+      <!-- LAST DETECT -->
+      <div class="detect-card">
+        <div class="detect-dot"></div>
+        <div>
+          <div class="detect-label">Deteksi Terakhir</div>
+          <div id="lastDetect">Belum ada deteksi</div>
+        </div>
       </div>
 
+      <!-- COUNTER CARDS -->
+      <p class="section-title">📦 Status Tempat Sampah</p>
       <div class="grid">
         <div class="card">
           <div class="badge-penuh" id="badgeOrganik">PENUH</div>
-          <h2>🌿 Organik</h2>
+          <div class="card-icon">🌿</div>
+          <div class="card-label">Organik</div>
           <div class="count organik" id="countOrganik">0</div>
-          <small style="color: gray">/ <span id="kapasitas">50</span></small>
+          <div class="count-sub">
+            / <span id="kapasitas">50</span> kapasitas
+          </div>
           <div class="progress-bar-bg">
             <div
               class="progress-bar bar-organik"
@@ -272,9 +481,12 @@
         </div>
         <div class="card">
           <div class="badge-penuh" id="badgeAnorganik">PENUH</div>
-          <h2>♻️ Anorganik</h2>
+          <div class="card-icon">♻️</div>
+          <div class="card-label">Anorganik</div>
           <div class="count anorganik" id="countAnorganik">0</div>
-          <small style="color: gray">/ <span id="kapasitas2">50</span></small>
+          <div class="count-sub">
+            / <span id="kapasitas2">50</span> kapasitas
+          </div>
           <div class="progress-bar-bg">
             <div
               class="progress-bar bar-anorganik"
@@ -285,9 +497,12 @@
         </div>
         <div class="card">
           <div class="badge-penuh" id="badgeB3">PENUH</div>
-          <h2>⚠️ B3</h2>
+          <div class="card-icon">⚠️</div>
+          <div class="card-label">B3 — Berbahaya</div>
           <div class="count b3" id="countB3">0</div>
-          <small style="color: gray">/ <span id="kapasitas3">50</span></small>
+          <div class="count-sub">
+            / <span id="kapasitas3">50</span> kapasitas
+          </div>
           <div class="progress-bar-bg">
             <div class="progress-bar bar-b3" id="barB3" style="width: 0%"></div>
           </div>
@@ -295,31 +510,51 @@
       </div>
 
       <!-- GRAFIK -->
+      <p class="section-title">📊 Statistik 7 Hari</p>
       <div class="chart-box">
-        <h3>📊 Grafik Deteksi 7 Hari Terakhir</h3>
-        <canvas id="grafikHarian" height="100"></canvas>
+        <canvas id="grafikHarian" height="90"></canvas>
       </div>
 
-      <!-- HISTORI -->
+      <!-- HISTORI (collapsible) -->
+      <p class="section-title">📋 Histori Deteksi</p>
       <div class="histori-box">
-        <h3>📋 Histori Deteksi Terbaru</h3>
-        <table>
-          <thead>
-            <tr>
-              <th>Waktu</th>
-              <th>Kategori</th>
-              <th>Confidence</th>
-            </tr>
-          </thead>
-          <tbody id="tabelHistori">
-            <tr>
-              <td colspan="3" style="text-align: center">Memuat...</td>
-            </tr>
-          </tbody>
-        </table>
+        <div class="histori-header" onclick="toggleHistori()">
+          <div class="histori-header-left">
+            Riwayat Deteksi Terbaru
+            <span class="histori-count" id="historiCount">0 data</span>
+          </div>
+          <div class="histori-toggle">
+            Lihat histori
+            <span class="chevron" id="chevron">▼</span>
+          </div>
+        </div>
+        <div class="histori-body" id="historiBody">
+          <div class="histori-inner">
+            <table>
+              <thead>
+                <tr>
+                  <th>Waktu</th>
+                  <th>Kategori</th>
+                  <th>Confidence</th>
+                </tr>
+              </thead>
+              <tbody id="tabelHistori">
+                <tr>
+                  <td
+                    colspan="3"
+                    style="text-align: center; color: var(--muted)"
+                  >
+                    Klik untuk memuat...
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
       </div>
 
-      <div style="text-align: center; margin-top: 10px">
+      <!-- RESET -->
+      <div style="text-align: center; margin-bottom: 20px">
         <form method="POST" action="/reset">
           <button
             type="submit"
@@ -331,93 +566,140 @@
         </form>
       </div>
 
-      <div class="footer">
-        SmartBin AI — Raspberry Pi + Flask + YOLOv8 TFLite
-        <br /><small id="lastUpdate">-</small>
-      </div>
+      <footer>SmartBin AI — YOLOv8 TFLite + Raspberry Pi + Railway</footer>
     </div>
 
     <script>
-      // ================= GRAFIK =================
+      // ===== CHART =====
       const ctx = document.getElementById("grafikHarian").getContext("2d");
       const grafik = new Chart(ctx, {
         type: "bar",
         data: {
           labels: [],
           datasets: [
-            { label: "Organik", data: [], backgroundColor: "#27ae60" },
-            { label: "Anorganik", data: [], backgroundColor: "#2980b9" },
-            { label: "B3", data: [], backgroundColor: "#c0392b" },
+            {
+              label: "Organik",
+              data: [],
+              backgroundColor: "rgba(39,174,96,0.75)",
+              borderRadius: 4,
+            },
+            {
+              label: "Anorganik",
+              data: [],
+              backgroundColor: "rgba(41,128,185,0.75)",
+              borderRadius: 4,
+            },
+            {
+              label: "B3",
+              data: [],
+              backgroundColor: "rgba(192,57,43,0.75)",
+              borderRadius: 4,
+            },
           ],
         },
         options: {
           responsive: true,
-          plugins: { legend: { position: "top" } },
-          scales: { x: { stacked: false }, y: { beginAtZero: true } },
+          plugins: {
+            legend: {
+              labels: { color: "#8b949e", font: { size: 12 } },
+            },
+          },
+          scales: {
+            x: {
+              ticks: { color: "#8b949e" },
+              grid: { color: "rgba(255,255,255,0.05)" },
+            },
+            y: {
+              beginAtZero: true,
+              ticks: { color: "#8b949e" },
+              grid: { color: "rgba(255,255,255,0.05)" },
+            },
+          },
         },
       });
 
       function updateGrafik() {
         fetch("/api/statistik")
-          .then((res) => res.json())
+          .then((r) => r.json())
           .then((data) => {
             const labels = Object.keys(data);
-            const organik = labels.map((d) => data[d].organik || 0);
-            const anorganik = labels.map((d) => data[d].anorganik || 0);
-            const b3 = labels.map((d) => data[d].b3 || 0);
-
             grafik.data.labels = labels;
-            grafik.data.datasets[0].data = organik;
-            grafik.data.datasets[1].data = anorganik;
-            grafik.data.datasets[2].data = b3;
+            grafik.data.datasets[0].data = labels.map(
+              (d) => data[d].organik || 0,
+            );
+            grafik.data.datasets[1].data = labels.map(
+              (d) => data[d].anorganik || 0,
+            );
+            grafik.data.datasets[2].data = labels.map((d) => data[d].b3 || 0);
             grafik.update();
           });
       }
 
-      // ================= HISTORI =================
-      function updateHistori() {
+      // ===== HISTORI (hanya load saat dibuka) =====
+      let historiLoaded = false;
+      let historiOpen = false;
+
+      function toggleHistori() {
+        historiOpen = !historiOpen;
+        const body = document.getElementById("historiBody");
+        const chevron = document.getElementById("chevron");
+        body.classList.toggle("open", historiOpen);
+        chevron.classList.toggle("open", historiOpen);
+        if (historiOpen && !historiLoaded) {
+          loadHistori();
+        }
+      }
+
+      function loadHistori() {
         fetch("/api/histori")
-          .then((res) => res.json())
+          .then((r) => r.json())
           .then((data) => {
+            historiLoaded = true;
             const tbody = document.getElementById("tabelHistori");
+            document.getElementById("historiCount").innerText =
+              data.length + " data";
             if (data.length === 0) {
               tbody.innerHTML =
-                '<tr><td colspan="3" style="text-align:center;">Belum ada data</td></tr>';
+                '<tr><td colspan="3" style="text-align:center;color:var(--muted);">Belum ada data</td></tr>';
               return;
             }
             tbody.innerHTML = data
               .map((row) => {
-                let badgeClass = "badge-anorganik";
+                let cls = "badge-anorganik";
                 if (
                   row.kategori.toLowerCase().includes("organik") &&
                   !row.kategori.toLowerCase().includes("an")
                 )
-                  badgeClass = "badge-organik";
-                if (row.kategori.toLowerCase().includes("b3"))
-                  badgeClass = "badge-b3";
+                  cls = "badge-organik";
+                if (row.kategori.toLowerCase().includes("b3")) cls = "badge-b3";
                 return `<tr>
-                    <td>${row.waktu}</td>
-                    <td><span class="badge ${badgeClass}">${row.kategori}</span></td>
-                    <td>${(row.confidence * 100).toFixed(1)}%</td>
-                </tr>`;
+          <td style="color:var(--muted);font-size:12px;">${row.waktu}</td>
+          <td><span class="badge ${cls}">${row.kategori}</span></td>
+          <td style="font-family:'Space Mono',monospace;font-size:12px;">${(row.confidence * 100).toFixed(1)}%</td>
+        </tr>`;
               })
               .join("");
           });
       }
 
-      // ================= DATA =================
+      // Refresh histori kalau sudah terbuka
+      function refreshHistoriIfOpen() {
+        if (historiOpen) loadHistori();
+      }
+
+      // ===== DASHBOARD DATA =====
       function updateDashboard() {
         fetch("/api/data")
-          .then((res) => res.json())
+          .then((r) => r.json())
           .then((data) => {
             const kap = data.kapasitas || 50;
             document.getElementById("countOrganik").innerText = data.organik;
             document.getElementById("countAnorganik").innerText =
               data.anorganik;
             document.getElementById("countB3").innerText = data.b3;
-            document.getElementById("kapasitas").innerText = kap;
-            document.getElementById("kapasitas2").innerText = kap;
-            document.getElementById("kapasitas3").innerText = kap;
+            ["kapasitas", "kapasitas2", "kapasitas3"].forEach(
+              (id) => (document.getElementById(id).innerText = kap),
+            );
             document.getElementById("barOrganik").style.width =
               Math.min((data.organik / kap) * 100, 100) + "%";
             document.getElementById("barAnorganik").style.width =
@@ -426,15 +708,12 @@
               Math.min((data.b3 / kap) * 100, 100) + "%";
             document.getElementById("lastDetect").innerText =
               data.last_detection || "Belum ada deteksi";
-            document
-              .getElementById("badgeOrganik")
-              .classList.toggle("show", data.penuh.organik);
-            document
-              .getElementById("badgeAnorganik")
-              .classList.toggle("show", data.penuh.anorganik);
-            document
-              .getElementById("badgeB3")
-              .classList.toggle("show", data.penuh.b3);
+
+            ["Organik", "Anorganik", "B3"].forEach((k) => {
+              document
+                .getElementById("badge" + k)
+                .classList.toggle("show", data.penuh[k.toLowerCase()]);
+            });
             const adaPenuh =
               data.penuh.organik || data.penuh.anorganik || data.penuh.b3;
             document
@@ -446,16 +725,15 @@
             if (data.penuh.b3) detail += " [B3]";
             document.getElementById("alertDetail").innerText = detail;
             document.getElementById("lastUpdate").innerText =
-              "Update terakhir: " + new Date().toLocaleTimeString();
+              new Date().toLocaleTimeString("id-ID");
           });
       }
 
       updateDashboard();
-      updateHistori();
       updateGrafik();
       setInterval(updateDashboard, 2000);
-      setInterval(updateHistori, 10000);
       setInterval(updateGrafik, 30000);
+      setInterval(refreshHistoriIfOpen, 15000);
     </script>
     <script src="/static/js/stream.js"></script>
   </body>
