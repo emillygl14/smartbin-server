@@ -16,7 +16,10 @@ MODEL_PATH = os.path.join(BASE_DIR, 'models', 'best_float32.tflite')
 stream_url_store = {"url": ""}
 
 # ================= LOAD MODEL =================
-from ai_edge_litert.interpreter import Interpreter
+try:
+    from tflite_runtime.interpreter import Interpreter
+except ImportError:
+    from tensorflow.lite.python.interpreter import Interpreter
 interpreter = Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 input_details  = interpreter.get_input_details()
