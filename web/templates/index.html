@@ -357,7 +357,7 @@
       });
 
       function updateGrafik() {
-        fetch("/statistik")
+        fetch("/api/statistik")
           .then((res) => res.json())
           .then((data) => {
             const labels = Object.keys(data);
@@ -375,7 +375,7 @@
 
       // ================= HISTORI =================
       function updateHistori() {
-        fetch("/histori")
+        fetch("/api/histori")
           .then((res) => res.json())
           .then((data) => {
             const tbody = document.getElementById("tabelHistori");
@@ -406,7 +406,7 @@
 
       // ================= DATA =================
       function updateDashboard() {
-        fetch("/data")
+        fetch("/api/data")
           .then((res) => res.json())
           .then((data) => {
             const kap = data.kapasitas || 50;
