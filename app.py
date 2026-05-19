@@ -10,29 +10,27 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
 
 # ================= PATH =================
-BASE_DIR  = os.path.dirname(os.path.abspath(__file__))
-DB_PATH   = os.path.join(BASE_DIR, 'smartbin.db')
+BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
+DB_PATH    = os.path.join(BASE_DIR, 'smartbin.db')
 MODEL_PATH = os.path.join(BASE_DIR, 'models', 'best_float32.tflite')
 
 # ================= LOAD MODEL =================
-# ================= LOAD MODEL =================
-try:
-    from tflite_runtime.interpreter import Interpreter
-except ImportError:
-    from tensorflow.lite.python.interpreter import Interpreter
-
+from tflite_runtime.interpreter import Interpreter
 interpreter = Interpreter(model_path=MODEL_PATH)
 interpreter.allocate_tensors()
 input_details  = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
+print("✅ Model TFLite berhasil dimuat")
 
 # ================= SETTING YOLO =================
 CONF_THRESHOLD = 0.45
 NMS_THRESHOLD  = 0.45
 MIN_BOX_RATIO  = 0.05
 MAX_BOX_RATIO  = 0.95
-class_names    = ["Plastik", "anorganik", "b3", "organik"]
-LABEL_MAP      = {
+
+class_names = ["Plastik", "anorganik", "b3", "organik"]
+
+LABEL_MAP = {
     "Plastik":   "Anorganik",
     "anorganik": "Anorganik",
     "organik":   "Organik",
@@ -50,11 +48,11 @@ def init_db():
         confidence REAL
     )''')
     c.execute('''CREATE TABLE IF NOT EXISTS counter (
-        id          INTEGER PRIMARY KEY,
-        organik     INTEGER DEFAULT 0,
-        anorganik   INTEGER DEFAULT 0,
-        b3          INTEGER DEFAULT 0,
-        kapasitas   INTEGER DEFAULT 50,
+        id           INTEGER PRIMARY KEY,
+        organik      INTEGER DEFAULT 0,
+        anorganik    INTEGER DEFAULT 0,
+        b3           INTEGER DEFAULT 0,
+        kapasitas    INTEGER DEFAULT 50,
         last_detection TEXT DEFAULT ""
     )''')
     c.execute("SELECT COUNT(*) FROM counter")
@@ -62,17 +60,21 @@ def init_db():
         c.execute("INSERT INTO counter VALUES (1,0,0,0,50,'')")
     conn.commit()
     conn.close()
+    print("✅ Database siap")
 
 init_db()
 
-# ================= YOLO DETECT =================
+# ================= YOLO DETECT (sekarang mengembalikan box juga) =================
 def detect_from_frame(frame):
     original_h, original_w = frame.shape[:2]
+
+    # ---- preprocess ----
     img = cv2.resize(frame, (640, 640))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img.astype(np.float32) / 255.0
     img = np.expand_dims(img, axis=0)
 
+    # ---- inference ----
     interpreter.set_tensor(input_details[0]['index'], img)
     interpreter.invoke()
     output      = interpreter.get_tensor(output_details[0]['index'])
@@ -91,6 +93,7 @@ def detect_from_frame(frame):
         if conf < CONF_THRESHOLD:
             continue
 
+        # scale koordinat
         if cx <= 2.0:
             cx = cx * original_w
             cy = cy * original_h
@@ -117,13 +120,16 @@ def detect_from_frame(frame):
         all_confs.append(conf)
         all_classes.append(cls)
 
+    # tidak ada deteksi
     if len(all_boxes) == 0:
-        return {"label": "", "confidence": 0}
+        return {"label": "", "confidence": 0, "box": None}
 
+    # NMS
     indices = cv2.dnn.NMSBoxes(all_boxes, all_confs, CONF_THRESHOLD, NMS_THRESHOLD)
     if len(indices) == 0:
-        return {"label": "", "confidence": 0}
+        return {"label": "", "confidence": 0, "box": None}
 
+    # ambil confidence terbaik
     best_conf = 0
     best_idx  = -1
     for i in indices.flatten():
@@ -132,25 +138,33 @@ def detect_from_frame(frame):
             best_idx  = i
 
     if best_idx == -1:
-        return {"label": "", "confidence": 0}
+        return {"label": "", "confidence": 0, "box": None}
+
+    x1, y1, bw, bh = all_boxes[best_idx]
+    x2 = x1 + bw
+    y2 = y1 + bh
 
     raw_label    = class_names[all_classes[best_idx]]
     display_name = LABEL_MAP.get(raw_label, raw_label)
 
-    return {"label": display_name, "confidence": round(best_conf, 2)}
+    return {
+        "label":      display_name,
+        "confidence": round(best_conf, 2),
+        "box":        [x1, y1, x2, y2]     # ✅ FIX: sekarang dikembalikan ke Raspberry Pi
+    }
 
-# ================= API DETECT (dipanggil Raspberry) =================
+# ================= API DETECT (dipanggil Raspberry Pi) =================
 @app.route('/api/detect', methods=['POST'])
 def api_detect():
     if 'frame' not in request.files:
-        return jsonify({"label": "", "confidence": 0})
+        return jsonify({"label": "", "confidence": 0, "box": None})
 
     file  = request.files['frame']
     npimg = np.frombuffer(file.read(), np.uint8)
     frame = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
     if frame is None:
-        return jsonify({"label": "", "confidence": 0})
+        return jsonify({"label": "", "confidence": 0, "box": None})
 
     result = detect_from_frame(frame)
 
@@ -185,9 +199,8 @@ def api_update():
 
     conn.commit()
 
-    # cek kapasitas
     c.execute("SELECT organik, anorganik, b3, kapasitas FROM counter WHERE id=1")
-    row      = c.fetchone()
+    row = c.fetchone()
     conn.close()
 
     penuh = {
@@ -195,7 +208,6 @@ def api_update():
         "anorganik": row[1] >= row[3],
         "b3":        row[2] >= row[3],
     }
-
     return jsonify({"success": True, "penuh": penuh})
 
 # ================= API DATA =================
@@ -218,9 +230,7 @@ def api_data():
             "b3":        row[2] >= row[3],
         }
     })
-@app.route('/test')
-def test():
-    return "TEST BERHASIL"
+
 # ================= API HISTORI =================
 @app.route('/api/histori')
 def api_histori():
