@@ -218,7 +218,9 @@ def api_data():
             "b3":        row[2] >= row[3],
         }
     })
-
+@app.route('/test')
+def test():
+    return "TEST BERHASIL"
 # ================= API HISTORI =================
 @app.route('/api/histori')
 def api_histori():
