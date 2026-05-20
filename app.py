@@ -193,16 +193,16 @@ def api_update():
     c.execute("SELECT organik, anorganik, b3, kapasitas FROM counter WHERE id=1")
     row = c.fetchone()
     if row[0] >= row[3]:
-    kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
+        kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
 
     if row[1] >= row[3]:
-    kirim_wa("🚨 Tempat sampah ANORGANIK penuh!")
+        kirim_wa("🚨 Tempat sampah ANORGANIK penuh!")
 
     if row[2] >= row[3]:
-    kirim_wa("🚨 Tempat sampah B3 penuh!")
+        kirim_wa("🚨 Tempat sampah B3 penuh!")
 
     conn.close()
-    
+
     return jsonify({"success": True, "penuh": {
         "organik":   row[0] >= row[3],
         "anorganik": row[1] >= row[3],
