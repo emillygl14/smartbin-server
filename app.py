@@ -1,4 +1,5 @@
 import os
+import requests
 import cv2
 import sqlite3
 import numpy as np
@@ -6,6 +7,8 @@ from datetime import datetime
 from flask import Flask, request, jsonify, render_template, redirect, url_for
 
 app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
+
+app = Flask(__name__)
 
 # ================= PATH =================
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
@@ -137,6 +140,20 @@ def detect_from_frame(frame):
         "box":        [x1, y1, x1 + bw, y1 + bh]
     }
 
+def kirim_wa(pesan):
+    token = "GzUZtmAHjEx28eeCPNrZ"
+
+    requests.post(
+        "https://api.fonnte.com/send",
+        headers={
+            "Authorization": token
+        },
+        data={
+            "target": "085394312574",
+            "message": pesan
+        }
+    )
+
 # ================= API DETECT =================
 @app.route('/api/detect', methods=['POST'])
 def api_detect():
@@ -175,7 +192,17 @@ def api_update():
     conn.commit()
     c.execute("SELECT organik, anorganik, b3, kapasitas FROM counter WHERE id=1")
     row = c.fetchone()
+    if row[0] >= row[3]:
+    kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
+
+    if row[1] >= row[3]:
+    kirim_wa("🚨 Tempat sampah ANORGANIK penuh!")
+
+    if row[2] >= row[3]:
+    kirim_wa("🚨 Tempat sampah B3 penuh!")
+
     conn.close()
+    
     return jsonify({"success": True, "penuh": {
         "organik":   row[0] >= row[3],
         "anorganik": row[1] >= row[3],
