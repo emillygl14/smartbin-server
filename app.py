@@ -8,8 +8,6 @@ from flask import Flask, request, jsonify, render_template, redirect, url_for
 
 app = Flask(__name__, template_folder='web/templates', static_folder='web/static')
 
-app = Flask(__name__)
-
 # ================= PATH =================
 BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 DB_PATH    = os.path.join(BASE_DIR, 'smartbin.db')
