@@ -4,100 +4,134 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>SmartBin Dashboard</title>
+    <link
+      href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@300;400;500;600;700;800&family=Space+Grotesk:wght@400;500;600;700&display=swap"
+      rel="stylesheet"
+    />
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-      @import url("https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Inter:wght@300;400;500;600;700&display=swap");
-
       * {
         margin: 0;
         padding: 0;
         box-sizing: border-box;
       }
-
       :root {
-        --bg: #0d1117;
-        --bg2: #161b22;
-        --bg3: #1c2333;
-        --border: rgba(255, 255, 255, 0.08);
-        --green: #27ae60;
-        --green2: #2ecc71;
-        --blue: #2980b9;
-        --red: #c0392b;
-        --text: #e6edf3;
-        --muted: #8b949e;
-        --card-shadow: 0 4px 24px rgba(0, 0, 0, 0.4);
+        --green: #16a34a;
+        --green2: #22c55e;
+        --green-bg: rgba(22, 163, 74, 0.08);
+        --blue: #2563eb;
+        --red: #dc2626;
+        --amber: #d97706;
+        --text: #0f172a;
+        --muted: #64748b;
+        --bg: #f8fafc;
+        --card: rgba(255, 255, 255, 0.72);
+        --border: rgba(22, 163, 74, 0.12);
       }
-
       body {
-        font-family: "Inter", sans-serif;
+        font-family: "Plus Jakarta Sans", sans-serif;
         background: var(--bg);
         color: var(--text);
         min-height: 100vh;
       }
 
-      /* ===== NAVBAR ===== */
+      .blob-wrap {
+        position: fixed;
+        inset: 0;
+        pointer-events: none;
+        z-index: 0;
+        overflow: hidden;
+      }
+      .blob {
+        position: absolute;
+        border-radius: 50%;
+        filter: blur(90px);
+        opacity: 0.25;
+      }
+      .blob-1 {
+        width: 600px;
+        height: 600px;
+        background: radial-gradient(circle, #bbf7d0, #86efac);
+        top: -150px;
+        left: -180px;
+      }
+      .blob-2 {
+        width: 450px;
+        height: 450px;
+        background: radial-gradient(circle, #dbeafe, #bfdbfe);
+        bottom: -80px;
+        right: -100px;
+      }
+
       nav {
-        background: rgba(13, 17, 23, 0.95);
-        backdrop-filter: blur(12px);
-        border-bottom: 1px solid var(--border);
-        padding: 14px 24px;
-        display: flex;
-        align-items: center;
-        justify-content: space-between;
         position: sticky;
         top: 0;
         z-index: 100;
-      }
-      .nav-brand {
+        padding: 14px 32px;
         display: flex;
         align-items: center;
-        gap: 10px;
-        font-family: "Space Mono", monospace;
-        font-size: 16px;
+        justify-content: space-between;
+        background: rgba(255, 255, 255, 0.75);
+        backdrop-filter: blur(20px);
+        border-bottom: 1px solid rgba(22, 163, 74, 0.1);
+      }
+      .nav-logo {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 18px;
         font-weight: 700;
-        color: var(--green2);
+        color: var(--green);
+        display: flex;
+        align-items: center;
+        gap: 8px;
         text-decoration: none;
       }
-      .nav-brand span {
+      .nav-logo span {
         color: var(--text);
       }
-      .nav-back {
-        font-size: 13px;
-        color: var(--muted);
-        text-decoration: none;
-        border: 1px solid var(--border);
-        padding: 6px 14px;
-        border-radius: 20px;
-        transition: all 0.2s;
-      }
-      .nav-back:hover {
-        color: var(--green2);
-        border-color: var(--green);
+      .nav-right {
+        display: flex;
+        align-items: center;
+        gap: 14px;
       }
       #lastUpdate {
         font-size: 12px;
         color: var(--muted);
       }
-
-      /* ===== LAYOUT ===== */
-      .container {
-        max-width: 1100px;
-        margin: 0 auto;
-        padding: 28px 20px;
+      .nav-back {
+        font-size: 13px;
+        color: var(--muted);
+        text-decoration: none;
+        border: 1px solid rgba(0, 0, 0, 0.1);
+        padding: 7px 16px;
+        border-radius: 50px;
+        transition: all 0.2s;
+      }
+      .nav-back:hover {
+        color: var(--green);
+        border-color: var(--green);
       }
 
-      /* ===== ALERT ===== */
+      .container {
+        max-width: 1080px;
+        margin: 0 auto;
+        padding: 28px 20px;
+        position: relative;
+        z-index: 1;
+      }
+
+      /* ALERT */
       .alert-penuh {
-        background: linear-gradient(135deg, #7b1919, #c0392b);
-        border: 1px solid rgba(231, 76, 60, 0.4);
+        background: linear-gradient(135deg, #fef2f2, #fee2e2);
+        border: 1px solid rgba(220, 38, 38, 0.25);
+        color: var(--red);
         padding: 14px 20px;
-        border-radius: 12px;
-        margin-bottom: 24px;
-        font-size: 15px;
+        border-radius: 14px;
+        margin-bottom: 22px;
+        font-size: 14px;
         font-weight: 600;
         text-align: center;
         display: none;
-        animation: blink 1.4s infinite;
+        animation: blink 1.5s infinite;
       }
       .alert-penuh.show {
         display: block;
@@ -108,54 +142,8 @@
           opacity: 1;
         }
         50% {
-          opacity: 0.7;
+          opacity: 0.65;
         }
-      }
-
-      /* ===== STREAM ===== */
-      #stream-container {
-        margin-bottom: 24px;
-        border-radius: 14px;
-        overflow: hidden;
-        border: 1px solid var(--border);
-        background: #000;
-      }
-      #stream-container img {
-        width: 100%;
-        display: block;
-      }
-
-      /* ===== LAST DETECT ===== */
-      .detect-card {
-        background: var(--bg2);
-        border: 1px solid var(--border);
-        border-radius: 14px;
-        padding: 20px 24px;
-        margin-bottom: 24px;
-        display: flex;
-        align-items: center;
-        gap: 16px;
-      }
-      .detect-label {
-        font-size: 13px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.08em;
-      }
-      #lastDetect {
-        font-size: 28px;
-        font-weight: 700;
-        color: var(--green2);
-        font-family: "Space Mono", monospace;
-      }
-      .detect-dot {
-        width: 10px;
-        height: 10px;
-        border-radius: 50%;
-        background: var(--green2);
-        box-shadow: 0 0 8px var(--green);
-        animation: pulse 2s infinite;
-        flex-shrink: 0;
       }
       @keyframes pulse {
         0%,
@@ -167,130 +155,187 @@
         }
       }
 
-      /* ===== GRID CARDS ===== */
+      /* STREAM */
+      #stream-container {
+        margin-bottom: 22px;
+        border-radius: 18px;
+        overflow: hidden;
+        border: 1px solid var(--border);
+        background: #f1f5f9;
+        box-shadow: 0 4px 24px rgba(0, 0, 0, 0.06);
+      }
+      #stream-container img {
+        width: 100%;
+        display: block;
+      }
+
+      /* LAST DETECT */
+      .detect-card {
+        background: var(--card);
+        backdrop-filter: blur(16px);
+        border: 1px solid var(--border);
+        border-radius: 16px;
+        padding: 18px 22px;
+        margin-bottom: 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+      }
+      .detect-dot {
+        width: 9px;
+        height: 9px;
+        border-radius: 50%;
+        background: var(--green2);
+        box-shadow: 0 0 8px var(--green2);
+        animation: pulse 2s infinite;
+        flex-shrink: 0;
+      }
+      .detect-label {
+        font-size: 11px;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.1em;
+        color: var(--muted);
+        margin-bottom: 2px;
+      }
+      #lastDetect {
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 26px;
+        font-weight: 700;
+        color: var(--green);
+      }
+
+      /* SECTION LABEL */
+      .sec-label {
+        font-size: 11px;
+        font-weight: 700;
+        text-transform: uppercase;
+        letter-spacing: 0.12em;
+        color: var(--muted);
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+      .sec-label::after {
+        content: "";
+        flex: 1;
+        height: 1px;
+        background: rgba(0, 0, 0, 0.07);
+      }
+
+      /* CARDS */
       .grid {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-        gap: 16px;
-        margin-bottom: 24px;
+        gap: 14px;
+        margin-bottom: 22px;
       }
       .card {
-        background: var(--bg2);
+        background: var(--card);
+        backdrop-filter: blur(16px);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 18px;
         padding: 22px 20px;
         position: relative;
-        transition:
-          border-color 0.2s,
-          transform 0.2s;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
+        transition: all 0.25s;
       }
       .card:hover {
-        transform: translateY(-2px);
-        border-color: rgba(255, 255, 255, 0.15);
+        transform: translateY(-3px);
+        box-shadow: 0 10px 32px rgba(0, 0, 0, 0.08);
       }
       .card-icon {
-        font-size: 28px;
-        margin-bottom: 8px;
+        font-size: 30px;
+        margin-bottom: 10px;
       }
-      .card-label {
-        font-size: 12px;
-        color: var(--muted);
+      .card-lbl {
+        font-size: 11px;
+        font-weight: 700;
         text-transform: uppercase;
-        letter-spacing: 0.08em;
+        letter-spacing: 0.09em;
+        color: var(--muted);
         margin-bottom: 4px;
       }
       .count {
-        font-size: 44px;
+        font-family: "Space Grotesk", sans-serif;
+        font-size: 46px;
         font-weight: 700;
-        font-family: "Space Mono", monospace;
         line-height: 1;
       }
       .count-sub {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--muted);
-        margin-top: 4px;
+        margin-top: 6px;
       }
-      .progress-bar-bg {
-        background: rgba(255, 255, 255, 0.07);
+      .prog-bg {
+        background: rgba(0, 0, 0, 0.06);
         border-radius: 8px;
         height: 6px;
         margin-top: 14px;
         overflow: hidden;
       }
-      .progress-bar {
+      .prog {
         height: 6px;
         border-radius: 8px;
         transition: width 0.5s ease;
       }
-      .organik {
-        color: var(--green2);
+      .c-green {
+        color: var(--green);
       }
-      .bar-organik {
+      .c-blue {
+        color: var(--blue);
+      }
+      .c-red {
+        color: var(--red);
+      }
+      .p-green {
         background: linear-gradient(90deg, var(--green), var(--green2));
       }
-      .anorganik {
-        color: #5dade2;
+      .p-blue {
+        background: linear-gradient(90deg, #1d4ed8, #60a5fa);
       }
-      .bar-anorganik {
-        background: linear-gradient(90deg, var(--blue), #5dade2);
-      }
-      .b3 {
-        color: #e74c3c;
-      }
-      .bar-b3 {
-        background: linear-gradient(90deg, var(--red), #e74c3c);
+      .p-red {
+        background: linear-gradient(90deg, var(--red), #f87171);
       }
       .badge-penuh {
         position: absolute;
         top: 12px;
         right: 12px;
-        background: var(--red);
-        color: white;
-        padding: 2px 8px;
-        border-radius: 6px;
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--red);
+        border: 1px solid rgba(220, 38, 38, 0.25);
+        padding: 3px 9px;
+        border-radius: 8px;
         font-size: 11px;
         font-weight: 700;
         display: none;
-        letter-spacing: 0.05em;
       }
       .badge-penuh.show {
         display: block;
       }
 
-      /* ===== SECTION TITLE ===== */
-      .section-title {
-        font-size: 13px;
-        color: var(--muted);
-        text-transform: uppercase;
-        letter-spacing: 0.1em;
-        margin-bottom: 14px;
-        display: flex;
-        align-items: center;
-        gap: 8px;
-      }
-      .section-title::after {
-        content: "";
-        flex: 1;
-        height: 1px;
-        background: var(--border);
-      }
-
-      /* ===== CHART ===== */
+      /* CHART */
       .chart-box {
-        background: var(--bg2);
+        background: var(--card);
+        backdrop-filter: blur(16px);
         border: 1px solid var(--border);
-        border-radius: 14px;
+        border-radius: 18px;
         padding: 22px;
-        margin-bottom: 24px;
+        margin-bottom: 22px;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       }
 
-      /* ===== HISTORI (collapsible) ===== */
+      /* HISTORI */
       .histori-box {
-        background: var(--bg2);
+        background: var(--card);
+        backdrop-filter: blur(16px);
         border: 1px solid var(--border);
-        border-radius: 14px;
-        margin-bottom: 24px;
+        border-radius: 18px;
+        margin-bottom: 22px;
         overflow: hidden;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.05);
       }
       .histori-header {
         padding: 18px 22px;
@@ -302,9 +347,9 @@
         transition: background 0.2s;
       }
       .histori-header:hover {
-        background: rgba(255, 255, 255, 0.03);
+        background: rgba(22, 163, 74, 0.03);
       }
-      .histori-header-left {
+      .histori-hl {
         display: flex;
         align-items: center;
         gap: 10px;
@@ -312,16 +357,16 @@
         font-weight: 600;
       }
       .histori-count {
-        background: rgba(39, 174, 96, 0.15);
-        color: var(--green2);
+        background: var(--green-bg);
+        color: var(--green);
         font-size: 11px;
         font-weight: 700;
-        padding: 2px 8px;
+        padding: 2px 9px;
         border-radius: 20px;
-        border: 1px solid rgba(39, 174, 96, 0.25);
+        border: 1px solid rgba(22, 163, 74, 0.2);
       }
       .histori-toggle {
-        font-size: 13px;
+        font-size: 12px;
         color: var(--muted);
         display: flex;
         align-items: center;
@@ -329,12 +374,11 @@
       }
       .chevron {
         transition: transform 0.3s;
-        font-size: 11px;
+        display: inline-block;
       }
       .chevron.open {
         transform: rotate(180deg);
       }
-
       .histori-body {
         max-height: 0;
         overflow: hidden;
@@ -343,9 +387,13 @@
       .histori-body.open {
         max-height: 600px;
       }
-
       .histori-inner {
         padding: 0 22px 20px;
+      }
+      .h-divider {
+        height: 1px;
+        background: rgba(0, 0, 0, 0.07);
+        margin-bottom: 16px;
       }
 
       table {
@@ -354,104 +402,100 @@
         font-size: 13px;
       }
       th {
-        background: var(--bg3);
+        background: rgba(248, 250, 252, 0.8);
         color: var(--muted);
         padding: 10px 12px;
         text-align: left;
         font-size: 11px;
         text-transform: uppercase;
         letter-spacing: 0.07em;
-        font-weight: 500;
-      }
-      th:first-child {
-        border-radius: 8px 0 0 8px;
-      }
-      th:last-child {
-        border-radius: 0 8px 8px 0;
+        font-weight: 600;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
       }
       td {
         padding: 10px 12px;
-        border-bottom: 1px solid rgba(255, 255, 255, 0.04);
+        border-bottom: 1px solid rgba(0, 0, 0, 0.04);
         color: var(--text);
       }
       tr:last-child td {
         border-bottom: none;
       }
       tr:hover td {
-        background: rgba(255, 255, 255, 0.02);
+        background: rgba(22, 163, 74, 0.02);
       }
+
       .badge {
         padding: 3px 10px;
         border-radius: 20px;
         font-size: 11px;
         font-weight: 700;
-        letter-spacing: 0.03em;
       }
-      .badge-organik {
-        background: rgba(39, 174, 96, 0.15);
-        color: #2ecc71;
-        border: 1px solid rgba(39, 174, 96, 0.3);
+      .bg-organik {
+        background: rgba(22, 163, 74, 0.1);
+        color: var(--green);
+        border: 1px solid rgba(22, 163, 74, 0.22);
       }
-      .badge-anorganik {
-        background: rgba(41, 128, 185, 0.15);
-        color: #5dade2;
-        border: 1px solid rgba(41, 128, 185, 0.3);
+      .bg-anorganik {
+        background: rgba(37, 99, 235, 0.1);
+        color: var(--blue);
+        border: 1px solid rgba(37, 99, 235, 0.22);
       }
-      .badge-b3 {
-        background: rgba(192, 57, 43, 0.15);
-        color: #e74c3c;
-        border: 1px solid rgba(192, 57, 43, 0.3);
+      .bg-b3 {
+        background: rgba(220, 38, 38, 0.1);
+        color: var(--red);
+        border: 1px solid rgba(220, 38, 38, 0.22);
       }
 
-      /* ===== RESET ===== */
+      /* RESET */
       .btn-reset {
-        background: transparent;
+        background: rgba(220, 38, 38, 0.07);
         color: var(--red);
-        border: 1px solid rgba(192, 57, 43, 0.4);
+        border: 1px solid rgba(220, 38, 38, 0.22);
         padding: 12px 28px;
-        border-radius: 10px;
+        border-radius: 12px;
         font-size: 14px;
         font-weight: 600;
         cursor: pointer;
         transition: all 0.2s;
-        font-family: "Inter", sans-serif;
+        font-family: "Plus Jakarta Sans", sans-serif;
       }
       .btn-reset:hover {
-        background: rgba(192, 57, 43, 0.1);
+        background: rgba(220, 38, 38, 0.12);
         border-color: var(--red);
       }
 
-      /* ===== FOOTER ===== */
       footer {
-        margin-top: 40px;
+        margin-top: 36px;
         padding: 20px 0;
         text-align: center;
         color: var(--muted);
         font-size: 12px;
-        border-top: 1px solid var(--border);
-        font-family: "Space Mono", monospace;
+        border-top: 1px solid rgba(0, 0, 0, 0.07);
       }
     </style>
   </head>
   <body>
-    <!-- NAVBAR -->
+    <div class="blob-wrap">
+      <div class="blob blob-1"></div>
+      <div class="blob blob-2"></div>
+    </div>
+
     <nav>
-      <a class="nav-brand" href="/dashboard">🗑️ <span>SmartBin</span> AI</a>
-      <span id="lastUpdate">—</span>
-      <a class="nav-back" href="/">← Beranda</a>
+      <a class="nav-logo" href="/dashboard">🗑️ Smart<span>Bin</span></a>
+      <div class="nav-right">
+        <span id="lastUpdate"></span>
+        <a href="/" class="nav-back">← Beranda</a>
+      </div>
     </nav>
 
     <div class="container">
-      <!-- ALERT PENUH -->
       <div class="alert-penuh" id="alertPenuh">
-        🚨 PERINGATAN: Tempat sampah sudah penuh! Segera dikosongkan!
+        🚨 Tempat sampah penuh! Segera dikosongkan —
         <span id="alertDetail"></span>
       </div>
 
-      <!-- STREAM -->
       <div id="stream-container"></div>
 
-      <!-- LAST DETECT -->
       <div class="detect-card">
         <div class="detect-dot"></div>
         <div>
@@ -460,76 +504,65 @@
         </div>
       </div>
 
-      <!-- COUNTER CARDS -->
-      <p class="section-title">📦 Status Tempat Sampah</p>
+      <p class="sec-label">📦 Status Tempat Sampah</p>
       <div class="grid">
         <div class="card">
           <div class="badge-penuh" id="badgeOrganik">PENUH</div>
           <div class="card-icon">🌿</div>
-          <div class="card-label">Organik</div>
-          <div class="count organik" id="countOrganik">0</div>
+          <div class="card-lbl">Organik</div>
+          <div class="count c-green" id="countOrganik">0</div>
           <div class="count-sub">
-            / <span id="kapasitas">50</span> kapasitas
+            dari <span id="kapasitas">50</span> kapasitas
           </div>
-          <div class="progress-bar-bg">
-            <div
-              class="progress-bar bar-organik"
-              id="barOrganik"
-              style="width: 0%"
-            ></div>
+          <div class="prog-bg">
+            <div class="prog p-green" id="barOrganik" style="width: 0%"></div>
           </div>
         </div>
         <div class="card">
           <div class="badge-penuh" id="badgeAnorganik">PENUH</div>
           <div class="card-icon">♻️</div>
-          <div class="card-label">Anorganik</div>
-          <div class="count anorganik" id="countAnorganik">0</div>
+          <div class="card-lbl">Anorganik</div>
+          <div class="count c-blue" id="countAnorganik">0</div>
           <div class="count-sub">
-            / <span id="kapasitas2">50</span> kapasitas
+            dari <span id="kapasitas2">50</span> kapasitas
           </div>
-          <div class="progress-bar-bg">
-            <div
-              class="progress-bar bar-anorganik"
-              id="barAnorganik"
-              style="width: 0%"
-            ></div>
+          <div class="prog-bg">
+            <div class="prog p-blue" id="barAnorganik" style="width: 0%"></div>
           </div>
         </div>
         <div class="card">
           <div class="badge-penuh" id="badgeB3">PENUH</div>
           <div class="card-icon">⚠️</div>
-          <div class="card-label">B3 — Berbahaya</div>
-          <div class="count b3" id="countB3">0</div>
+          <div class="card-lbl">B3 — Berbahaya</div>
+          <div class="count c-red" id="countB3">0</div>
           <div class="count-sub">
-            / <span id="kapasitas3">50</span> kapasitas
+            dari <span id="kapasitas3">50</span> kapasitas
           </div>
-          <div class="progress-bar-bg">
-            <div class="progress-bar bar-b3" id="barB3" style="width: 0%"></div>
+          <div class="prog-bg">
+            <div class="prog p-red" id="barB3" style="width: 0%"></div>
           </div>
         </div>
       </div>
 
-      <!-- GRAFIK -->
-      <p class="section-title">📊 Statistik 7 Hari</p>
+      <p class="sec-label">📊 Statistik 7 Hari Terakhir</p>
       <div class="chart-box">
         <canvas id="grafikHarian" height="90"></canvas>
       </div>
 
-      <!-- HISTORI (collapsible) -->
-      <p class="section-title">📋 Histori Deteksi</p>
+      <p class="sec-label">📋 Histori Deteksi</p>
       <div class="histori-box">
         <div class="histori-header" onclick="toggleHistori()">
-          <div class="histori-header-left">
-            Riwayat Deteksi Terbaru
-            <span class="histori-count" id="historiCount">0 data</span>
+          <div class="histori-hl">
+            Riwayat Terbaru
+            <span class="histori-count" id="historiCount">— data</span>
           </div>
           <div class="histori-toggle">
-            Lihat histori
-            <span class="chevron" id="chevron">▼</span>
+            Lihat histori <span class="chevron" id="chevron">▼</span>
           </div>
         </div>
         <div class="histori-body" id="historiBody">
           <div class="histori-inner">
+            <div class="h-divider"></div>
             <table>
               <thead>
                 <tr>
@@ -542,9 +575,13 @@
                 <tr>
                   <td
                     colspan="3"
-                    style="text-align: center; color: var(--muted)"
+                    style="
+                      text-align: center;
+                      color: var(--muted);
+                      padding: 20px;
+                    "
                   >
-                    Klik untuk memuat...
+                    Klik untuk memuat data...
                   </td>
                 </tr>
               </tbody>
@@ -553,7 +590,6 @@
         </div>
       </div>
 
-      <!-- RESET -->
       <div style="text-align: center; margin-bottom: 20px">
         <form method="POST" action="/reset">
           <button
@@ -566,11 +602,13 @@
         </form>
       </div>
 
-      <footer>SmartBin AI — YOLOv8 TFLite + Raspberry Pi + Railway</footer>
+      <footer>
+        SmartBin AI — YOLOv8 TFLite · Raspberry Pi · Railway · Cloudflare Tunnel
+      </footer>
     </div>
 
     <script>
-      // ===== CHART =====
+      // CHART
       const ctx = document.getElementById("grafikHarian").getContext("2d");
       const grafik = new Chart(ctx, {
         type: "bar",
@@ -580,20 +618,20 @@
             {
               label: "Organik",
               data: [],
-              backgroundColor: "rgba(39,174,96,0.75)",
-              borderRadius: 4,
+              backgroundColor: "rgba(22,163,74,0.7)",
+              borderRadius: 5,
             },
             {
               label: "Anorganik",
               data: [],
-              backgroundColor: "rgba(41,128,185,0.75)",
-              borderRadius: 4,
+              backgroundColor: "rgba(37,99,235,0.7)",
+              borderRadius: 5,
             },
             {
               label: "B3",
               data: [],
-              backgroundColor: "rgba(192,57,43,0.75)",
-              borderRadius: 4,
+              backgroundColor: "rgba(220,38,38,0.7)",
+              borderRadius: 5,
             },
           ],
         },
@@ -601,18 +639,21 @@
           responsive: true,
           plugins: {
             legend: {
-              labels: { color: "#8b949e", font: { size: 12 } },
+              labels: {
+                color: "#64748b",
+                font: { size: 12, family: "Plus Jakarta Sans" },
+              },
             },
           },
           scales: {
             x: {
-              ticks: { color: "#8b949e" },
-              grid: { color: "rgba(255,255,255,0.05)" },
+              ticks: { color: "#94a3b8" },
+              grid: { color: "rgba(0,0,0,0.04)" },
             },
             y: {
               beginAtZero: true,
-              ticks: { color: "#8b949e" },
-              grid: { color: "rgba(255,255,255,0.05)" },
+              ticks: { color: "#94a3b8" },
+              grid: { color: "rgba(0,0,0,0.04)" },
             },
           },
         },
@@ -621,109 +662,98 @@
       function updateGrafik() {
         fetch("/api/statistik")
           .then((r) => r.json())
-          .then((data) => {
-            const labels = Object.keys(data);
+          .then((d) => {
+            const labels = Object.keys(d);
             grafik.data.labels = labels;
-            grafik.data.datasets[0].data = labels.map(
-              (d) => data[d].organik || 0,
-            );
+            grafik.data.datasets[0].data = labels.map((k) => d[k].organik || 0);
             grafik.data.datasets[1].data = labels.map(
-              (d) => data[d].anorganik || 0,
+              (k) => d[k].anorganik || 0,
             );
-            grafik.data.datasets[2].data = labels.map((d) => data[d].b3 || 0);
+            grafik.data.datasets[2].data = labels.map((k) => d[k].b3 || 0);
             grafik.update();
           });
       }
 
-      // ===== HISTORI (hanya load saat dibuka) =====
-      let historiLoaded = false;
-      let historiOpen = false;
-
+      // HISTORI
+      let historiLoaded = false,
+        historiOpen = false;
       function toggleHistori() {
         historiOpen = !historiOpen;
-        const body = document.getElementById("historiBody");
-        const chevron = document.getElementById("chevron");
-        body.classList.toggle("open", historiOpen);
-        chevron.classList.toggle("open", historiOpen);
-        if (historiOpen && !historiLoaded) {
-          loadHistori();
-        }
+        document
+          .getElementById("historiBody")
+          .classList.toggle("open", historiOpen);
+        document
+          .getElementById("chevron")
+          .classList.toggle("open", historiOpen);
+        if (historiOpen && !historiLoaded) loadHistori();
       }
-
       function loadHistori() {
         fetch("/api/histori")
           .then((r) => r.json())
           .then((data) => {
             historiLoaded = true;
-            const tbody = document.getElementById("tabelHistori");
             document.getElementById("historiCount").innerText =
               data.length + " data";
-            if (data.length === 0) {
+            const tbody = document.getElementById("tabelHistori");
+            if (!data.length) {
               tbody.innerHTML =
-                '<tr><td colspan="3" style="text-align:center;color:var(--muted);">Belum ada data</td></tr>';
+                '<tr><td colspan="3" style="text-align:center;color:var(--muted);padding:20px;">Belum ada data</td></tr>';
               return;
             }
             tbody.innerHTML = data
-              .map((row) => {
-                let cls = "badge-anorganik";
+              .map((r) => {
+                let cls = "bg-anorganik";
                 if (
-                  row.kategori.toLowerCase().includes("organik") &&
-                  !row.kategori.toLowerCase().includes("an")
+                  r.kategori.toLowerCase().includes("organik") &&
+                  !r.kategori.toLowerCase().includes("an")
                 )
-                  cls = "badge-organik";
-                if (row.kategori.toLowerCase().includes("b3")) cls = "badge-b3";
+                  cls = "bg-organik";
+                if (r.kategori.toLowerCase().includes("b3")) cls = "bg-b3";
                 return `<tr>
-          <td style="color:var(--muted);font-size:12px;">${row.waktu}</td>
-          <td><span class="badge ${cls}">${row.kategori}</span></td>
-          <td style="font-family:'Space Mono',monospace;font-size:12px;">${(row.confidence * 100).toFixed(1)}%</td>
+          <td style="color:var(--muted);font-size:12px;">${r.waktu}</td>
+          <td><span class="badge ${cls}">${r.kategori}</span></td>
+          <td style="font-family:'Space Grotesk',monospace;font-size:12px;color:var(--muted);">${(r.confidence * 100).toFixed(1)}%</td>
         </tr>`;
               })
               .join("");
           });
       }
-
-      // Refresh histori kalau sudah terbuka
       function refreshHistoriIfOpen() {
         if (historiOpen) loadHistori();
       }
 
-      // ===== DASHBOARD DATA =====
+      // DASHBOARD
       function updateDashboard() {
         fetch("/api/data")
           .then((r) => r.json())
-          .then((data) => {
-            const kap = data.kapasitas || 50;
-            document.getElementById("countOrganik").innerText = data.organik;
-            document.getElementById("countAnorganik").innerText =
-              data.anorganik;
-            document.getElementById("countB3").innerText = data.b3;
+          .then((d) => {
+            const kap = d.kapasitas || 50;
+            document.getElementById("countOrganik").innerText = d.organik;
+            document.getElementById("countAnorganik").innerText = d.anorganik;
+            document.getElementById("countB3").innerText = d.b3;
             ["kapasitas", "kapasitas2", "kapasitas3"].forEach(
               (id) => (document.getElementById(id).innerText = kap),
             );
             document.getElementById("barOrganik").style.width =
-              Math.min((data.organik / kap) * 100, 100) + "%";
+              Math.min((d.organik / kap) * 100, 100) + "%";
             document.getElementById("barAnorganik").style.width =
-              Math.min((data.anorganik / kap) * 100, 100) + "%";
+              Math.min((d.anorganik / kap) * 100, 100) + "%";
             document.getElementById("barB3").style.width =
-              Math.min((data.b3 / kap) * 100, 100) + "%";
+              Math.min((d.b3 / kap) * 100, 100) + "%";
             document.getElementById("lastDetect").innerText =
-              data.last_detection || "Belum ada deteksi";
-
-            ["Organik", "Anorganik", "B3"].forEach((k) => {
+              d.last_detection || "Belum ada deteksi";
+            ["Organik", "Anorganik", "B3"].forEach((k) =>
               document
                 .getElementById("badge" + k)
-                .classList.toggle("show", data.penuh[k.toLowerCase()]);
-            });
-            const adaPenuh =
-              data.penuh.organik || data.penuh.anorganik || data.penuh.b3;
-            document
-              .getElementById("alertPenuh")
-              .classList.toggle("show", adaPenuh);
-            let detail = "";
-            if (data.penuh.organik) detail += " [ORGANIK]";
-            if (data.penuh.anorganik) detail += " [ANORGANIK]";
-            if (data.penuh.b3) detail += " [B3]";
-            document.getElementById("alertDetail").innerText = detail;
+                .classList.toggle("show", d.penuh[k.toLowerCase()]),
+            );
+            const ada = d.penuh.organik || d.penuh.anorganik || d.penuh.b3;
+            document.getElementById("alertPenuh").classList.toggle("show", ada);
+            let det = "";
+            if (d.penuh.organik) det += " [ORGANIK]";
+            if (d.penuh.anorganik) det += " [ANORGANIK]";
+            if (d.penuh.b3) det += " [B3]";
+            document.getElementById("alertDetail").innerText = det;
             document.getElementById("lastUpdate").innerText =
               new Date().toLocaleTimeString("id-ID");
           });
