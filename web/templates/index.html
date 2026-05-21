@@ -590,16 +590,12 @@
         </div>
       </div>
 
-      <div style="text-align: center; margin-bottom: 20px">
-        <form method="POST" action="/reset">
-          <button
-            type="submit"
-            class="btn-reset"
-            onclick="return confirm('Reset semua counter ke 0?');"
-          >
-            🔄 Reset Semua Counter
-          </button>
-        </form>
+      <div class="reset-buttons">
+        <button onclick="resetKategori('organik')">Reset Organik</button>
+
+        <button onclick="resetKategori('anorganik')">Reset Anorganik</button>
+
+        <button onclick="resetKategori('b3')">Reset B3</button>
       </div>
 
       <footer>
@@ -766,5 +762,27 @@
       setInterval(refreshHistoriIfOpen, 15000);
     </script>
     <script src="/static/js/stream.js"></script>
+    <script>
+      async function resetKategori(kategori) {
+        if (!confirm(`Reset ${kategori}?`)) return;
+
+        try {
+          const response = await fetch(`/api/reset/${kategori}`, {
+            method: "POST",
+          });
+
+          const result = await response.json();
+
+          if (result.success) {
+            alert(`${kategori} berhasil direset`);
+            location.reload();
+          } else {
+            alert("Gagal reset");
+          }
+        } catch (err) {
+          alert("Server error");
+        }
+      }
+    </script>
   </body>
 </html>
