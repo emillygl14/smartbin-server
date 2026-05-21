@@ -8,7 +8,7 @@ function initVideoStream() {
     try {
       const response = await fetch("/api/stream-url");
       const data = await response.json();
-      const url = data.stream_url;
+      const url = "http://192.168.180.26:5000/video_feed";
 
       if (url && url !== "") {
         container.innerHTML = `
