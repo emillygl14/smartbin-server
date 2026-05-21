@@ -478,6 +478,14 @@
         opacity: 0.9;
       }
 
+      .reset-buttons {
+        display: flex;
+        gap: 10px;
+        justify-content: center;
+        margin-top: 20px;
+        flex-wrap: wrap;
+      }
+
       footer {
         margin-top: 36px;
         padding: 20px 0;
@@ -605,11 +613,23 @@
       </div>
 
       <div class="reset-buttons">
-        <button onclick="resetKategori('organik')">Reset Organik</button>
+        <button
+          class="btn-reset btn-organik"
+          onclick="resetKategori('organik')"
+        >
+          Reset Organik
+        </button>
 
-        <button onclick="resetKategori('anorganik')">Reset Anorganik</button>
+        <button
+          class="btn-reset btn-anorganik"
+          onclick="resetKategori('anorganik')"
+        >
+          Reset Anorganik
+        </button>
 
-        <button onclick="resetKategori('b3')">Reset B3</button>
+        <button class="btn-reset btn-b3" onclick="resetKategori('b3')">
+          Reset B3
+        </button>
       </div>
 
       <footer>
