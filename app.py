@@ -286,6 +286,17 @@ def api_reset():
     conn.close()
     return jsonify({"success": True})
 
+@app.route("/api/reset/<kategori>", methods=["POST"])
+def api_reset_kategori(kategori):
+    if kategori not in ["organik", "anorganik", "b3"]:
+        return jsonify({"success": False, "error": "Kategori tidak valid"}), 400
+    conn = sqlite3.connect(DB_PATH)
+    c    = conn.cursor()
+    c.execute(f"UPDATE counter SET {kategori}=0 WHERE id=1")
+    conn.commit()
+    conn.close()
+    return jsonify({"success": True})
+
 # ================= API REGISTER STREAM =================
 @app.route('/api/register-stream', methods=['POST'])
 def register_stream():
