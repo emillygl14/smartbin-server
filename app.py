@@ -147,7 +147,7 @@ def kirim_wa(pesan):
             "Authorization": token
         },
         data={
-            "target": "085394312574",
+            "target": "6285394312574",
             "message": pesan
         }
     )
@@ -190,6 +190,7 @@ def api_update():
     conn.commit()
     c.execute("SELECT organik, anorganik, b3, kapasitas FROM counter WHERE id=1")
     row = c.fetchone()
+    
     if row[0] >= row[3]:
         kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
 
@@ -299,6 +300,29 @@ def dashboard():
 def reset_web():
     api_reset()
     return redirect(url_for('dashboard'))
+@app.route('/api/reset/<kategori>', methods=['POST'])
+def reset_kategori(kategori):
+
+    with open('web/data.json', 'r') as f:
+        data = json.load(f)
+
+    if kategori in ['organik', 'anorganik', 'b3']:
+
+        data[kategori] = 0
+        data['penuh'][kategori] = False
+
+        with open('web/data.json', 'w') as f:
+            json.dump(data, f, indent=4)
+
+        return jsonify({
+            "success": True,
+            "kategori": kategori
+        })
+
+    return jsonify({
+        "success": False,
+        "message": "Kategori tidak valid"
+    }), 400
 
 # ================= RUN =================
 if __name__ == '__main__':
