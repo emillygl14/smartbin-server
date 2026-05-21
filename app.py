@@ -13,7 +13,7 @@ BASE_DIR   = os.path.dirname(os.path.abspath(__file__))
 DB_PATH    = os.path.join(BASE_DIR, 'smartbin.db')
 MODEL_PATH = os.path.join(BASE_DIR, 'models', 'best_float32.tflite')
 
-# ================= SIMPAN URL STREAM (in-memory, reset saat restart) =================
+# ================= SIMPAN URL STREAM =================
 stream_url_store = {"url": ""}
 
 # ================= LOAD MODEL =================
@@ -27,11 +27,18 @@ input_details  = interpreter.get_input_details()
 output_details = interpreter.get_output_details()
 print("✅ Model TFLite berhasil dimuat")
 
-# ================= SETTING YOLO =================
-CONF_THRESHOLD = 0.45
+# ================= SETTING YOLO — disamakan dengan versi Pi lama =================
+CONF_THRESHOLD = 0.55   # ← naik dari 0.45 ke 0.55 (sama dengan Pi lama)
 NMS_THRESHOLD  = 0.45
 MIN_BOX_RATIO  = 0.05
-MAX_BOX_RATIO  = 0.95
+MAX_BOX_RATIO  = 0.70   # ← turun dari 0.95 ke 0.70 (sama dengan Pi lama)
+
+# Zona deteksi valid — pusat objek harus ada di sini
+# Filter ini yang bikin versi lama "hanya fokus 1 objek dan tidak deteksi tangan/wajah di pinggir"
+ZONE_X1_RATIO = 0.10   # 10% dari kiri
+ZONE_X2_RATIO = 0.90   # 90% dari kiri
+ZONE_Y1_RATIO = 0.05   # 5% dari atas
+ZONE_Y2_RATIO = 0.95   # 95% dari atas
 
 class_names = ["Plastik", "anorganik", "b3", "organik"]
 LABEL_MAP   = {
@@ -71,6 +78,14 @@ init_db()
 # ================= YOLO DETECT =================
 def detect_from_frame(frame):
     original_h, original_w = frame.shape[:2]
+
+    # Zona valid dalam piksel
+    zone_x1 = int(original_w * ZONE_X1_RATIO)
+    zone_x2 = int(original_w * ZONE_X2_RATIO)
+    zone_y1 = int(original_h * ZONE_Y1_RATIO)
+    zone_y2 = int(original_h * ZONE_Y2_RATIO)
+
+    # Preprocess
     img = cv2.resize(frame, (640, 640))
     img = cv2.cvtColor(img, cv2.COLOR_BGR2RGB)
     img = img.astype(np.float32) / 255.0
@@ -90,6 +105,7 @@ def detect_from_frame(frame):
         class_scores = det[4:]
         cls  = int(np.argmax(class_scores))
         conf = float(class_scores[cls])
+
         if conf < CONF_THRESHOLD:
             continue
 
@@ -104,9 +120,17 @@ def detect_from_frame(frame):
         x2 = min(original_w, int(cx + w / 2)); y2 = min(original_h, int(cy + h / 2))
         bw = x2 - x1; bh = y2 - y1
 
+        # Filter ukuran
         if bw < original_w * MIN_BOX_RATIO: continue
         if bh < original_h * MIN_BOX_RATIO: continue
         if bw > original_w * MAX_BOX_RATIO and bh > original_h * MAX_BOX_RATIO: continue
+
+        # ✅ Filter zona — pusat box harus ada di zona valid
+        # Ini yang mencegah deteksi tangan/wajah di pinggir frame
+        cx_box = (x1 + x2) / 2
+        cy_box = (y1 + y2) / 2
+        if not (zone_x1 < cx_box < zone_x2 and zone_y1 < cy_box < zone_y2):
+            continue
 
         all_boxes.append([x1, y1, bw, bh])
         all_confs.append(conf)
@@ -119,11 +143,13 @@ def detect_from_frame(frame):
     if len(indices) == 0:
         return {"label": "", "confidence": 0, "box": None}
 
+    # Ambil deteksi dengan confidence tertinggi setelah NMS
     best_conf = 0
     best_idx  = -1
     for i in indices.flatten():
         if all_confs[i] > best_conf:
-            best_conf = all_confs[i]; best_idx = i
+            best_conf = all_confs[i]
+            best_idx  = i
 
     if best_idx == -1:
         return {"label": "", "confidence": 0, "box": None}
@@ -138,18 +164,13 @@ def detect_from_frame(frame):
         "box":        [x1, y1, x1 + bw, y1 + bh]
     }
 
+# ================= NOTIF WA =================
 def kirim_wa(pesan):
     token = "GzUZtmAHjEx28eeCPNrZ"
-
     requests.post(
         "https://api.fonnte.com/send",
-        headers={
-            "Authorization": token
-        },
-        data={
-            "target": "6285394312574",
-            "message": pesan
-        }
+        headers={"Authorization": token},
+        data={"target": "6285394312574", "message": pesan}
     )
 
 # ================= API DETECT =================
@@ -190,18 +211,12 @@ def api_update():
     conn.commit()
     c.execute("SELECT organik, anorganik, b3, kapasitas FROM counter WHERE id=1")
     row = c.fetchone()
-    
-    if row[0] >= row[3]:
-        kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
 
-    if row[1] >= row[3]:
-        kirim_wa("🚨 Tempat sampah ANORGANIK penuh!")
-
-    if row[2] >= row[3]:
-        kirim_wa("🚨 Tempat sampah B3 penuh!")
+    if row[0] >= row[3]: kirim_wa("🚨 Tempat sampah ORGANIK penuh!")
+    if row[1] >= row[3]: kirim_wa("🚨 Tempat sampah ANORGANIK penuh!")
+    if row[2] >= row[3]: kirim_wa("🚨 Tempat sampah B3 penuh!")
 
     conn.close()
-
     return jsonify({"success": True, "penuh": {
         "organik":   row[0] >= row[3],
         "anorganik": row[1] >= row[3],
@@ -224,7 +239,7 @@ def api_data():
             "anorganik": row[1] >= row[3],
             "b3":        row[2] >= row[3],
         },
-        "stream_url": stream_url_store["url"]   # ← dikonsumsi dashboard
+        "stream_url": stream_url_store["url"]
     })
 
 # ================= API HISTORI =================
@@ -271,7 +286,7 @@ def api_reset():
     conn.close()
     return jsonify({"success": True})
 
-# ================= API REGISTER STREAM (dipanggil Pi via tunnel.py) =================
+# ================= API REGISTER STREAM =================
 @app.route('/api/register-stream', methods=['POST'])
 def register_stream():
     data = request.json
@@ -300,29 +315,6 @@ def dashboard():
 def reset_web():
     api_reset()
     return redirect(url_for('dashboard'))
-@app.route('/api/reset/<kategori>', methods=['POST'])
-def reset_kategori(kategori):
-
-    with open('web/data.json', 'r') as f:
-        data = json.load(f)
-
-    if kategori in ['organik', 'anorganik', 'b3']:
-
-        data[kategori] = 0
-        data['penuh'][kategori] = False
-
-        with open('web/data.json', 'w') as f:
-            json.dump(data, f, indent=4)
-
-        return jsonify({
-            "success": True,
-            "kategori": kategori
-        })
-
-    return jsonify({
-        "success": False,
-        "message": "Kategori tidak valid"
-    }), 400
 
 # ================= RUN =================
 if __name__ == '__main__':
